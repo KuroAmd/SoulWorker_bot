@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import os
+import datetime
 
 Kat = commands.Bot(command_prefix = 'sw!')
 mood = ''
@@ -22,19 +23,17 @@ async def on_member_remove(member):
     general_ch= Kat.get_channel(727092352807731272)
     await general_ch.send(f"{member} has left... aww")
 
-#@Kat.event
-#async def on_message(self,msg):
-#    if msg.content.startswith('Hi' or 'Hello' or 'hi' or 'hello' or 'Hey'):
-#        await msg.channel.send("Hello hello!")
-#    if msg.content("Why don't you die?"):
-#        await .send("Okay")
-
 #spy
 @Kat.event
 async def on_user_update(before,after):
     print(f"a user changed to: {after}")
 
 #cmds
+@Kat.command()
+async def clock(ctx):
+    a=datetime.datetime.now()
+    await ctx.send("It's {0}:{1}".format(a.hour,a.minute))
+
 @Kat.command(aliases=['RepeatAfterMe'])
 async def repeat(ctx,*,msg):
     await ctx.send(f"{msg}{mood}")
