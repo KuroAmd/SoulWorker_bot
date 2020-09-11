@@ -15,6 +15,7 @@ async def on_ready():
 async def on_command_error(ctx,error):
     print(error)
     await ctx.send("That's wrong! {0}".format(error))
+    
 #nope, this aint workin'
 @Kat.event
 async def when_mentioned(bot,msg):
@@ -49,15 +50,15 @@ async def repeat(ctx,*,msg):
 
 @Kat.command()
 async def story(ctx,character):
-    if character == 'Catherine' or 'catherine':
+    if(character == 'Catherine' or 'catherine'):
         await ctx.send("I always aimed to be a strong Soul-- and eventually a strong Soulworker!\n")
-    elif character == 'Erwin' or 'erwin' or 'Arclight':
+    elif(character == 'Erwin' or 'erwin' or 'Arclight'):
         await ctx.send("What Erwin is to me?")
         await ctx.send("First time I saw him, he inspired me!\nHe always does his best and doesn't give up! And he's always been nice to me... So I kind of, love Erwin!\nI gave Erwin a wire ring that I made, maybe it's not very well-made, but he always wears it!")
-    elif character == 'Jin' or 'jin' or 'Seipatsu':
+    elif(character == 'Jin' or 'jin' or 'Seipatsu'):
         await ctx.send("What do I think of Jin?")
 
-    elif character == '':
+    elif(character == ''):
         await ctx.send("uh")
         
     else:
@@ -65,8 +66,9 @@ async def story(ctx,character):
 
 @Kat.command()
 async def Kill(ctx, amt=10):
-    await ctx.channel.purge(limit=amt)
-    await ctx.channel.send(f"{amt} souldregs were killed{mood}!")
+    if ctx.author.id == 444806806682730496:
+        await ctx.channel.purge(limit=amt)
+        await ctx.channel.send(f"{amt} souldregs were killed{mood}!")
 
 @Kat.command(hidden=True)
 async def mode(ctx,value):
