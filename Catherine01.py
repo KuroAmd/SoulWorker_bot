@@ -68,7 +68,7 @@ async def Kill(ctx, amt=10):
     await ctx.channel.purge(limit=amt)
     await ctx.channel.send(f"{amt} souldregs were killed{mood}!")
 
-@Kat.command()
+@Kat.command(hidden=True)
 async def mode(ctx,value):
     global mood
     if value == '0':
@@ -87,7 +87,7 @@ async def flamegorl(ctx):
     else:
         await ctx.send("Don't bully Aurumiel-sama!")
 
-@Kat.command()
+@Kat.command(hidden=True)
 async def die(ctx):
     if ctx.author.id == 444806806682730496:
         await ctx.send("Okay")
