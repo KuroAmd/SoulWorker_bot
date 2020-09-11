@@ -2,8 +2,8 @@ import discord
 from discord.ext import commands
 import os
 import datetime
-
-Kat = commands.Bot(command_prefix = 'sw!')
+p='sw!'
+Kat = commands.Bot(command_prefix = commands.when_mentioned_or(p))
 mood = ''
 
 #events
@@ -11,6 +11,15 @@ mood = ''
 async def on_ready():
     print("Catherine is on!")
 
+@Kat.event
+async def on_command_error(ctx,error):
+    print(error)
+    await ctx.send("That's wrong! {0}".format(error))
+#nope, this aint workin'
+@Kat.event
+async def when_mentioned(bot,msg):
+    await bot.msg.channel.send("My prefix is {0}".format(p))
+    
 @Kat.event
 async def on_member_join(member):
     print(f"{member} joined!")
