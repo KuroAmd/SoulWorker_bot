@@ -50,15 +50,15 @@ async def repeat(ctx,*,msg):
 
 @Kat.command()
 async def story(ctx,character):
-    if(character == 'Catherine' or 'catherine'):
+    if(character) == 'Catherine' or 'catherine':
         await ctx.send("I always aimed to be a strong Soul-- and eventually a strong Soulworker!\n")
-    elif(character == 'Erwin' or 'erwin' or 'Arclight'):
+    elif(character) == 'Erwin' or 'erwin' or 'Arclight':
         await ctx.send("What Erwin is to me?")
         await ctx.send("First time I saw him, he inspired me!\nHe always does his best and doesn't give up! And he's always been nice to me... So I kind of, love Erwin!\nI gave Erwin a wire ring that I made, maybe it's not very well-made, but he always wears it!")
-    elif(character == 'Jin' or 'jin' or 'Seipatsu'):
+    elif(character) == 'Jin' or 'jin' or 'Seipatsu':
         await ctx.send("What do I think of Jin?")
 
-    elif(character == ''):
+    elif(character) == '':
         await ctx.send("uh")
         
     else:
