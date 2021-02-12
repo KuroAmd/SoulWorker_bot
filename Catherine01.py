@@ -19,7 +19,7 @@ async def on_command_error(ctx,error):
 #nope, this aint workin'
 @Kat.event
 async def when_mentioned(bot,msg):
-    await bot.msg.channel.send("My prefix is {0}".format(p))
+    await msg.channel.send("My prefix is {0}".format(p))
     
 @Kat.event
 async def on_member_join(member):
