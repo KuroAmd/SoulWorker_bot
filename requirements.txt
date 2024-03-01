@@ -9,3 +9,4 @@ PyNaCl
 wikipedia
 wolframalpha
 yt-dlp
+opus
