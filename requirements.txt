@@ -1,2 +1,11 @@
 discord
-datetime
+animec
+aiohttp
+bs4
+Cython
+ffmpeg
+lxml
+PyNaCl
+wikipedia
+wolframalpha
+yt-dlp
