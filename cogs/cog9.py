@@ -5,7 +5,7 @@ from discord import FFmpegPCMAudio as fpcm
 #from discord.voice_client import VoiceClient
 from yt_dlp import YoutubeDL as ytdl
 import asyncio
-import datetime
+from datetime import datetime, timezone
 import aiohttp
 #import json
 #import re
@@ -15,6 +15,7 @@ from discord.ext.music import MusicClient, WAVAudio, Track
 #import ffmpeg
 import ctypes.util
 #import opus
+import sys
 
 #ydl_opts = {
 # 'usenetrc': opts.usenetrc,
@@ -175,7 +176,10 @@ def yt_search(arg):
             requests.get(arg)
         except:
             video = ydl.extract_info(
-                f"ytsearch:{arg}", download=False)['entries'][0]  # takes the first element from the entries
+                f"ytsearch:{arg}", download=False)
+            if video and 'entries' in video:
+                video = video['entries'][0]  # takes the first element from the entries
+
         else:
             video = ydl.extract_info(arg, download=False)
     return video
@@ -193,16 +197,21 @@ class Music(commands.Cog):
         '''Search a YT vid'''
         await ctx.typing()
         print(arg)
-        s = yt_search(arg)['webpage_url']
-        print("the url:\n" + s)
+        vid = yt_search(arg)
+        if vid:
+            s = vid['webpage_url']
+            print("the url:\n" + s)
+        else:
+            s = "Video not found"
+            print("Error 404 " ,s)
         await ctx.send(s)
 
-  
+
     ## Doesn't work!
     @commands.command(hidden=True)
     async def Play(self, ctx, *, arg=None):
         '''testing discord.ext.music funcs (doesnt seem to work, and their docs succ)'''
-      
+
         if mypl == []:
             load_s(mypl)
         song = mypl[0]
@@ -214,28 +223,28 @@ class Music(commands.Cog):
         print(song_n)
 
         try:
-          Vch = ctx.author.voice.channel
-          mcl = await Vch.connect(cls= MusicClient)
-          print("connected to {0}!".format(Vch))
-          
-        except Exception as e:
-          print(e)
-          
-        try:
-          track = Track(
-              WAVAudio(song), # AudioSource
-              song,
-              url=arg) # name
-          print("find audio")
-          
-          await mcl.play(track)
-          print("play audio")
-          
-        except Exception as e:
-          print(e)
-          
+            Vch = ctx.author.voice.channel
+            mcl = await Vch.connect(cls= MusicClient)
+            print("connected to {0}!".format(Vch))
 
-          
+            try:
+              track = Track(
+                  WAVAudio(song), # AudioSource
+                  song,
+                  url=arg if arg else "") # name
+              print("find audio")
+
+              await mcl.play(track)
+              print("play audio")
+
+            except Exception as e:
+              print(e)
+
+        except Exception as e:
+          print(e)
+
+
+
     @commands.hybrid_command(aliases=['m', 'M', "موسيق", "موزیک"])
     @app_commands.guilds()
     async def music(self, ctx, arg: str = 'a', *, link=None):
@@ -273,35 +282,50 @@ class Music(commands.Cog):
             YDL_OPTIONS = {'format': 'bestaudio', 'noplaylist': 'True'}
             with ytdl(YDL_OPTIONS) as ydl:
                 try:
-                    requests.get(link)
-                except:
-                    vid = ydl.extract_info(f"ytsearch:{link}", download=False)[
-                        'entries']  # take the first element from the entries
+                    requests.get(str(link))
+                except Exception as e:
+                    print(f"Error fetching link: {e}")
+                    vid = ydl.extract_info(f"ytsearch:{link}", download=False)
+                    if vid is None:
+                        await ctx.send("Video not found")
+                    elif 'entries' in vid:
+                        vid = vid['entries'][0]  # take the first element from the entries
                 else:
-                    vid = ydl.extract_info(link, download=False)['entries']
+                    vid = ydl.extract_info(link, download=False)
+                    if vid is None:
+                        await ctx.send("Video not found")
+                        return
+                    elif 'entries' in vid:
+                        vid = vid['entries'][0]  # take the first element from the entries
+                    else:
+                        # Handle single video case
+                        print(vid) 
+                        # ... Process the video info as needed
                     print(vid)
-                    songt = " "  ## no no no, use .join() method!!
-                    for i in vid:
-                        songt += i['title']
+                    if 'entries' in vid:
+                        songt = [entry['title'] for entry in vid['entries']]
+                    else:
+                        songt = [vid['title']] 
+                    songt = "\n".join(songt)
                     await ctx.send(songt)
             pass
             ## give results and lets choose which one to play
 
         elif arg.lower() in ("play", "p", "شغل"):  ## in my pl, a way to play next is stop & play again
-            
+
             if link == "opus":
                 print("ctypes - Find opus:")
                 a = ctypes.util.find_library('opus')
                 print(a)
-                 
+
                 print("Discord - Load Opus:")
-                b = discord.opus.load_opus(a)
+                b = discord.opus.load_opus(a) if a else "Opus not found"
                 print(b)
-                 
+
                 print("Discord - Is loaded:")
                 c = discord.opus.is_loaded()
                 print(c)
-            
+
             if not ctx.guild.voice_client:
                 if ctx.author.voice:
                     Vch = ctx.author.voice.channel
@@ -378,8 +402,12 @@ class Music(commands.Cog):
                     })
                     bmsg = await ctx.send('Preparing song... Please wait.')
                     ul = yt_search(link)
-                    print(ul['title'])
-                    print("url of vid:\n", ul['webpage_url'])
+                    if ul:
+                        print(ul['title'])
+                        print("url of vid:\n", ul['webpage_url'])
+                    else:
+                        print("Error: vid url not found")
+                        return
 
                     Vch = get(self.client.voice_clients, guild=ctx.guild)
 
@@ -392,9 +420,9 @@ class Music(commands.Cog):
                     if not Vch.is_playing():
                         info = ydl_opts.extract_info(url=ul['webpage_url'],
                                                      download=False)
-                        URL = info['formats'][0]['url']
+                        URL = info['formats'][0]['url'] if info else ''
                         print("URL to play:\n" + URL)
-                        Vch.play(fpcm(URL, **FFMPEG_OPTIONS), after=q_n)
+                        Vch.play(fpcm(URL, **FFMPEG_OPTIONS), after=q_n, stderr=sys.stderr)
                         await bmsg.delete()
                         bmsg = await ctx.send(f"Now playing\n> {ul['title']}")
                         Vch.is_playing()
@@ -403,7 +431,7 @@ class Music(commands.Cog):
                     #  return
             else:
                 #add to Queue
-                await Q.put(' '.join(link))
+                Q.put_nowait(link)
                 #
                 bmsg = await ctx.send('added to queue')
                 await bmsg.delete(delay=3)
@@ -414,7 +442,7 @@ class Music(commands.Cog):
             if Vch.is_playing():
                 Vch.stop()
                 print(pq)
-                Vch.play(fpcm(Q.put_nowait(mypl[0])))
+                Vch.play(fpcm(Q.get_nowait()))
 
         elif arg == "Skip":
             Vch = get(self.client.voice_clients, guild=ctx.guild)
@@ -476,8 +504,9 @@ class Music(commands.Cog):
             await bmsg.delete(delay=10)
 
         elif arg.lower() in ("playlist", "pl", "queue", "q", "المشغل"):
+            #items = [Q.get_nowait() for i in range(Q.qsize())]
             em = discord.Embed(title="Current Playlist",
-                               description=Q._queue,
+                               description=list(Q._queue),
                                colour=56550)
             await ctx.send(embed=em)
 
@@ -527,36 +556,35 @@ class Music(commands.Cog):
 
         print(arg)
         #arg = parse.quote(arg) # url-encode the song provided so it can be passed on to the API
-        
+
         arg.replace(' ', '+')
         async with aiohttp.ClientSession() as lrcses:
             async with lrcses.get(f'https://some-random-api.com/lyrics?title={arg}') as jsondata: # define jsondata and fetch from API
                 print(jsondata)
                 if not 300 > jsondata.status >= 200: # if an unexpected HTTP status code is recieved from the website, throw an error and come out of the command
                     return await ctx.send(f'Recieved poor status code of {jsondata.status}')
-    
+
                 lrcData = await jsondata.json() # load the json data into its json form
-    
+
         if lrcData.get('error'): # checking if there is an error recieved by the API, and if there is then throwing an error message and returning out of the command
             return await ctx.send(f'Recieved unexpected error: {lrcData.get("error")}')
-    
+
         songLyrics = lrcData['lyrics'] # the lyrics
         #songArtist = lrcData['author'] # the author's name
         #songTitle = lrcData['title'] # the song's title
         songThumbnail = lrcData['thumbnail']['genius'] # the song's picture/thumbnail
-
-
+        em = discord.Embed(
+            title=f"**{(str(lrcData['title']))}** by {(str(lrcData['author']))}",
+            description= songLyrics[:3000]) # Limit to 3000 characters initially
+        em.set_footer(text="{0}".format(ctx.message.author.name),
+               icon_url=ctx.message.author.display_avatar)
+        em.timestamp = datetime.now(timezone.utc)
+        em.set_thumbnail(url = songThumbnail)
+        
         try:
-            for chunk in [songLyrics[i:i + 3000] for i in range(0, len(songLyrics), 3000)]:
-                em = discord.Embed(
-                    title=
-                    f"**{(str(lrcData['title']))}** by {(str(lrcData['author']))}",
-                    description=chunk)
-                #embed.set_footer(text=chunk)
-                em.set_footer(text="{0}".format(ctx.message.author.name),
-                               icon_url=ctx.message.author.display_avatar)
-                em.timestamp = datetime.datetime.utcnow()
-                em.set_thumbnail(url = songThumbnail)
+            for chunk in [songLyrics[i:i + 3000] for i in range(3000, len(songLyrics), 3000)]:
+                em.description = chunk
+                await ctx.send(embed=em)
 
         except discord.HTTPException:
             em = discord.Embed(
@@ -566,11 +594,11 @@ class Music(commands.Cog):
             em.set_footer(
                 text="{0}\nID: {1}\n{2}".format(
                   ctx.message.author.name, ctx.message.author.id,
-                  datetime.datetime.utcnow().strftime("%A, %B %d %Y at %I:%M:%S %p UTC")),  ## Doesn't show
+                  datetime.now(timezone.utc).strftime("%A, %B %d %Y at %I:%M:%S %p UTC")),  ## Doesn't show
                 icon_url=ctx.message.author.display_avatar)
             em.set_thumbnail(url = songThumbnail)
-            em.timestamp = datetime.datetime.utcnow()
-          
+            em.timestamp = datetime.now(timezone.utc)
+
         await ctx.send(embed=em)
 
 
@@ -586,7 +614,7 @@ class Music(commands.Cog):
                             await vc.disconnect()
         except Exception as e:
             print(e)
-    
+
 
 async def setup(client):
     await client.add_cog(Music(client))

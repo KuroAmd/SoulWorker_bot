@@ -4,7 +4,7 @@ import datetime
 from discord import Embed
 #import asyncio
 #import os
-#from replit import db
+from replit import db
 
 def wel_ch(m):
   channel = m.guild.system_channel

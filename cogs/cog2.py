@@ -20,7 +20,7 @@ import contextlib
 import re
 #import roundTime
 from wolframalpha import Client as WA
-#from replit import db
+from replit import db
 
 gid= discord.Object(id= 727092352363135077)
 

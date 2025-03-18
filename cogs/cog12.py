@@ -3,7 +3,7 @@
 
 import discord
 from discord.ext import commands
-import voice_recv
+#import voice_recv
 
 
 class Tst(commands.Cog):

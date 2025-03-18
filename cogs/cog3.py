@@ -31,7 +31,7 @@ class Games(commands.Cog):
           await msg.reply('اخطأت')
 
 ## Cross & Nots
-    @commands.command(aliases=['xno',"اکس"])
+    @commands.hybrid_command(aliases=['xno',"اکس"])
     async def tictac(self,ctx, player_2:discord.Member, sym_1="✖️",sym_2="⭕"):
         if player_2.bot:
             await ctx.send("Can't play with a bot")
@@ -77,7 +77,7 @@ class Games(commands.Cog):
 
 
 ## Hangman
-    @commands.hybrid_command(aliases=["المشنقة","الجلاد"]) # how about make it edit the 1st msgs every letter
+    @commands.command(aliases=["المشنقة","الجلاد"]) # how about make it edit the 1st msgs every letter
     async def hangman(self,ctx):
         """You've 5 tries to guess a letters of a random word (please send 1 letter at a time)""" # # word count in english2.txt is 65194 words!
         word=random.choice(open("english2.txt","r").read().split())
@@ -85,25 +85,25 @@ class Games(commands.Cog):
         win = False
         strikes = [] # can do win=False if strikes==5
         guesses = []
-        display_word = len(word)*['- '] 
+        display_word = len(word)*['-'] 
         print("\nLet's play HANGMAN!\n")
         print(word,"\n",display_word,'\n')
         await ctx.send("Let's play HANGMAN! Can you guess in 5 strikes?")
         await ctx.send(content=("".join(display_word)+"\n."))
         #endregion
         #region game loop
-        while (win == False) and (len(strikes) < 5):
+        while (not win) and (len(strikes) < 5):
           #  letter = raw_input("Guess a letter! ").lower()
           #  define bmsg
             def ch(message):
-              return message.author.bot==False
+              return not message.author.bot
             msg= await self.client.wait_for('message',check=ch)
             #print(msg)
             letter=msg.content.lower()
             print(letter)
             await ctx.typing()
 
-            if not letter in string.ascii_lowercase or letter=='':
+            if letter not in string.ascii_lowercase or letter=='':
                 #await ctx.send("not a valid guess, please try again")
                 continue
 
@@ -123,18 +123,17 @@ class Games(commands.Cog):
                     await msg.reply("wrong guess...")
 
             await ctx.send(embed=discord.Embed(title="The mystery word so far:",description= "".join(display_word)))
-            await ctx.send(("Already guessed letters: ", guesses))
-            await ctx.send(("Strikes remaining: " + str(5-len(strikes)))) #send pic of hangman
+            await ctx.send("Already guessed letters: "+ str(guesses) + "\nStrikes remaining: "+ str(5-len(strikes))) #send pic of hangman
             if display_word == list(word):
                 win = True
             #print(win)
         #endregion
 
-        if win == True:
+        if win:
             await msg.reply("Hats off to you! You win!")
         else:
-            hang="```\n\t|\n\to\n  --|--\n   /\```"
-            await msg.reply(f"Better luck time!\nCan't win 'em all.\n{hang}")
+            hang="```\n  ^|\n\t|\n\to\n  --|-- \n   /\\```"
+            await msg.reply(f"Better luck next time!\nCan't win 'em all.\n{hang}")
         print("The word was '", ''.join(word) , "'")
         await ctx.send("The word is '"+''.join(word)+"'")
 

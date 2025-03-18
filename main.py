@@ -16,17 +16,20 @@ import discord
 from discord import Embed, Colour, app_commands
 from discord.ext import commands, tasks
 #import json
-#from replit import db ## Use MongoDB
-
+from replit import db
 #import aiohttp
 #import random
-#from keep import keep_alive
-from datetime import datetime
+from keep import keep_alive
+from datetime import datetime, timezone
 from itertools import cycle
 import asyncio
 from inspect import getsource
 import re
 import typing
+
+from keep import keep_alive
+
+keep_alive()
 
 from cogs.cog1 import Greetings
 from cogs.cog2 import Moderating
@@ -109,7 +112,7 @@ async def change_status():
 async def on_command_error(ctx, error):
 	print(error)
 	#await ctx.send("something's wrong!")
-	await ctx.send(embed=Embed(title='Error', description= error, colour=16711680, timestamp= datetime.utcnow()))
+	await ctx.send(embed=Embed(title='Error', description= error, colour=16711680, timestamp= datetime.now(timezone.utc)))
 
 @Kat.hybrid_command()
 @app_commands.guilds(gid)
@@ -186,11 +189,11 @@ if __name__ == '__main__':
 # cmds
 @Kat.hybrid_command(aliases=["الساعة","ساعة","الوقت"])
 async def clock(ctx):
-	a = datetime.utcnow()
-	em= Embed(title="Right now", description="It's {0}:{1} GMT{2}".format(a.hour, a.minute, mood), timestamp=a,colour=Colour.green())
+	a = datetime.now(timezone.utc)
+	em= Embed(title="Right now", description="It's {0}:{1} GMT{2}".format(a.hour, a.minute, db['mood'] if db else ''), timestamp=a,colour=Colour.green())
 	await ctx.send(embed=em)
 
-        
+
 @Kat.hybrid_command(aliases=["مساعده","مساعدة"], hidden= True)
 async def halp(ctx):
   await ctx.send_help()
@@ -205,7 +208,7 @@ async def showcode(ctx, args):
         try:
             print("1st") # works when exact cmd name is given
             code = getsource(typing.cast(typing.Callable, globals()[args].callback))
-        except:
+        except Exception as e:
             print("KeyError")
             cmd = Kat.get_command(args)
             print(cmd) # works when an alias of a cmd is given
@@ -216,7 +219,7 @@ async def showcode(ctx, args):
                 try: # should return a module and/or other parts that are not a cmd
                     print("Modules")
                     code = getsource(globals()[args])
-                except:
+                except Exception as e:
                     print("Not Found\n")
                     await ctx.send(embed=Embed(title="E 404",description= "Command not found!", colour= discord.Colour.red()))
                     return
@@ -259,13 +262,13 @@ async def mode(ctx, value:int):
       pass
     elif value == 2:
       mood = " nya"
-    await ctx.send("Okay{0}".format(mood))
+    await ctx.send("Okay{0}".format(db['mood'] if db else ''))
     db["mood"] = mood
 
 #special response from me (or flamegorl)
 @Kat.command()
 async def flamegorl(ctx):
-    mood = db['mood']
+    mood = db['mood'] if db else ''
     if ctx.author.id == 444806806682730496:
       await ctx.channel.send("That's Aurumiel-sama{0}!".format(mood))
     elif ctx.author.id == 146828906069098496:
@@ -274,10 +277,10 @@ async def flamegorl(ctx):
       await ctx.send("Don't bully Aurumiel-sama!")
 
 @Kat.command(hidden=True)
-async def db_keys(ctx,*,v:str =None):
+async def db_keys(ctx,*,v = None):
     if ctx.author.id == 444806806682730496:
       if v:
-        s=db[v]
+        s = db[str(v)]
       else:
         v = db.keys()
         #print(v)
@@ -285,8 +288,8 @@ async def db_keys(ctx,*,v:str =None):
         for i in v:
           print(i)
           s.append(i)
-          
-      await ctx.send(s if s else 'None') ## if/else statement in a single line! (don't put colons)
+
+      await ctx.send(s if s else None) ## if/else statement in a single line! (don't put colons)
 
 @Kat.command(hidden=True)
 async def die(ctx):
@@ -294,7 +297,7 @@ async def die(ctx):
 		await ctx.send("Okay")
 		await Kat.close()
 	else:
-		await ctx.send("Nope!{0}".format(mood))
+		await ctx.send("Nope!{0}".format(db['mood'] if db else ''))
 
 @Kat.command(hidden=True)
 async def Shutdown(ctx):
@@ -302,4 +305,4 @@ async def Shutdown(ctx):
 
 
 keep_alive()
-Kat.run(os.getenv("TOKEN"))
+Kat.run(str(os.getenv("TOKEN")))

@@ -1,5 +1,4 @@
-import discord
-from discord.ext import commands
+import nextcord
 import os
 import wikipedia
 from chatbot import Chat, register_call
