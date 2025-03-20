@@ -4,3 +4,13 @@ numpy
 pillow
 requests
 gtts
+animec
+wikipedia
+worldmeter
+yt-dlp
+PyNaCl
+opuslib
+google-trans-new
+Flask
+discord
+aiohttp
