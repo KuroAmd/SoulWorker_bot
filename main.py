@@ -19,7 +19,6 @@ from discord.ext import commands, tasks
 from replit import db
 #import aiohttp
 #import random
-from keep import keep_alive
 from datetime import datetime, timezone
 from itertools import cycle
 import asyncio
@@ -27,9 +26,8 @@ from inspect import getsource
 import re
 import typing
 
-from keep import keep_alive
-
-keep_alive()
+#from keep import keep_alive
+#keep_alive()
 
 from cogs.cog1 import Greetings
 from cogs.cog2 import Moderating
@@ -303,6 +301,4 @@ async def die(ctx):
 async def Shutdown(ctx):
 	await die(ctx)
 
-
-keep_alive()
 Kat.run(str(os.getenv("TOKEN")))
