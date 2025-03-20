@@ -8,7 +8,7 @@ WORKDIR /app
 #COPY . /app
 
 # Install the application dependencies
-RUN pip install -r requirements.txt
+RUN pip install -r requirement.txt
 
 # Define the entry point for the container
-CMD ["python", "main.py"]
+CMD ["python3", "main.py"]
